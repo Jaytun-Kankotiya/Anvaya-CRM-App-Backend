@@ -23,8 +23,7 @@ await initializedata()
 
 // api endpoints
 
-app.use('/api/leads', leadRouter)
-
+app.use('/v1/leads', leadRouter)
 
 app.use('/v1/agents', salesAgentRouter)
 

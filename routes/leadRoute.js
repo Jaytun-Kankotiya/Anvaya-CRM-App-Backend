@@ -1,5 +1,5 @@
 import express from 'express'
-import { addLead } from '../controllers/leadController.js'
+import { addLead, deleteLead, getAllLeads, updateLead } from '../controllers/leadController.js'
 import multer from 'multer'
 
 const leadRouter = express.Router()
@@ -15,6 +15,9 @@ const leadRouter = express.Router()
 // const upload = multer({storage: storage})
 
 leadRouter.post('/add',  addLead)
+leadRouter.get('/', getAllLeads)
+leadRouter.put('/:id', updateLead)
+leadRouter.delete('/:id', deleteLead)
 
 
 export default leadRouter
