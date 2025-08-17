@@ -6,12 +6,12 @@ import leadRouter from './routes/leadRoute.js'
 import salesAgentRouter from './routes/salesAgentRoute.js'
 import commentRouter from './routes/commentRoute.js'
 import reportRouter from './routes/reportRouter.js'
+import authRouter from './routes/authRoute.js'
 
 dotenv.config()
 
 const app = express()
 app.use(express.json())
-
 
 const corsOptions = {
     origin: "*",
@@ -33,6 +33,7 @@ app.use('/v1/leads', commentRouter)
 
 app.use('/v1/report', reportRouter)
 
+app.use('/v1/auth', authRouter)
 
 
 
