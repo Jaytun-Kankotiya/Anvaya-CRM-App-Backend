@@ -4,6 +4,8 @@ import cors from 'cors'
 import  {initializedata}  from './config/db.connect.js'
 import leadRouter from './routes/leadRoute.js'
 import salesAgentRouter from './routes/salesAgentRoute.js'
+import commentRouter from './routes/commentRoute.js'
+import reportRouter from './routes/reportRouter.js'
 
 dotenv.config()
 
@@ -26,6 +28,10 @@ await initializedata()
 app.use('/v1/leads', leadRouter)
 
 app.use('/v1/agents', salesAgentRouter)
+
+app.use('/v1/leads', commentRouter)
+
+app.use('/v1/report', reportRouter)
 
 
 

@@ -1,3 +1,4 @@
+import { error } from 'console'
 import salesAgentModel from '../models/salesAgentModel.js'
 import mongoose from 'mongoose'
 
@@ -12,7 +13,6 @@ const isValidEmail = (email) => {
 
     return true
 }
-
 
 const addSalesAgent = async (req, res) => {
     try {
@@ -41,4 +41,16 @@ const addSalesAgent = async (req, res) => {
     }
 }
 
-export {addSalesAgent}
+const getAllSalesAgent = async (req, res) => {
+    try {
+        const salesAgentsList = await salesAgentModel.find()
+        if(!salesAgentsList) {
+            return res.status(400).json({error: "Error fetching Sales Agents List."})
+        }
+        res.status(200).json({message: "Sales Agents List", salesAgentsList})
+    } catch (error) {
+        res.status(500).json({error: "Sales Agents List not found."})
+    }
+}
+
+export {addSalesAgent, getAllSalesAgent}
