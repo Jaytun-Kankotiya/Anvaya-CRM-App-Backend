@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import userModel from "../models/userModel.js";
 import transporter from "../config/nodemailer.js";
+// import { errorMonitor } from "nodemailer/lib/xoauth2/index.js";
 
 export const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -41,7 +42,7 @@ export const register = async (req, res) => {
 
     return res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -140,11 +141,11 @@ export const sendVerificationOtp = async (req, res) => {
 };
 
 export const verifyEmail = async (req, res) => {
-  const { otp } = req.body;
-  const userId = req.userId;
+  const { otp, userId } = req.body;
+//   const userId = req.userId;
 
   if (!userId || !otp) {
-    res.json({ success: false, message: "Missing Details" });
+    return res.json({ success: false, message: "Missing Details" });
   }
 
   try {
@@ -170,6 +171,103 @@ export const verifyEmail = async (req, res) => {
 
     return res.json({ success: true, message: "Email Verified successfully" });
   } catch (error) {
-    res.json({ success: false, message: error.message });
+    return res.json({ success: false, message: error.message });
   }
 };
+
+export const isAuthenticated = async (req, res) => {
+    try {
+        return res.json({success: true})
+    } catch (error) {
+        res.json({success: false, message: error.message})
+    }
+}
+
+// send OTP to Reset Password
+
+export const sendResetOtp = async (req, res) => {
+    const {email} = req.body
+    if(!email) {
+        return res.json({success: false, message: "Email is required"})
+    }
+
+    try {
+        const user = await userModel.findOne({email})
+        if(!user) {
+            return res.json({success: false, message: 'User not found'})
+        }
+
+
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    user.resetOtp = otp;
+    user.resetOtpExpireAt = Date.now() +  15 * 60 * 1000;
+
+    await user.save();
+
+    const mailOption = {
+      from: process.env.SENDER_EMAIL,
+      to: user.email,
+      subject: `Your Password Reset OTP`,
+      html: `
+    <div style="font-family: 'Helvetica', 'Arial', sans-serif;">
+      <h2 style="color: #101010ff;">Hello ${user.name || ""},</h2>
+      <p>We received a request to reset your password for your <strong>Anvaya CRM</strong>.</p>
+      <p>Your <strong>Password Reset One-Time Password (OTP)</strong> is:</p>
+      <h1 style="color: #222222ff;">${otp}</h1>
+      <p>This OTP is valid for <strong>15 minutes</strong>.</p>
+      <p>Please do not share this OTP with anyone.</p>
+      <hr>
+      <p style="font-size: 12px; color: #777;">
+        If you did not request this OTP, please ignore this email.
+      </p>
+      <p style="font-size: 12px; color: #777;">
+        &copy; 2025 Anvaya CRM. All rights reserved.
+      </p>
+    </div>
+  `,
+    };
+    await transporter.sendMail(mailOption);
+
+    return res.json({success: true, message: 'OTP sent to your email'})
+
+    } catch (error) {
+        res.json({success: false, message: error.message})
+    }
+}
+
+// Reset User Password
+
+export const resetPassword = async (req, res) => {
+    const {email, otp, newPassword} = req.body
+
+    if(!email || !otp || !newPassword){
+        return res.json({success: false, message: 'Email, OTP, and new password are required'})
+    }
+
+    try {
+        const user = await userModel.findOne({email})
+        if(!user) {
+            return res.json({success: false, message: 'User not found'})
+        }
+
+        if(user.resetOtp === "" || user.resetOtp !== otp){
+            return res.json({success: false, message: 'Invalid OTP'})
+        }
+
+        if(user.resetOtpExpireAt < Date.now()) {
+            return res.json({success: false, message: 'OTP Expired'})
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10)
+
+        user.password = hashedPassword
+        user.resetOtp = ''
+        user.resetOtpExpireAt = 0
+
+        await user.save()
+        res.json({success: true, message: 'Password has been reset successfully'})
+
+    } catch (error) {
+        res.json({success: false, message: error.message})
+    }
+}

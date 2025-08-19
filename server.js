@@ -8,6 +8,7 @@ import commentRouter from './routes/commentRoute.js'
 import reportRouter from './routes/reportRouter.js'
 import authRouter from './routes/authRoute.js'
 import cookieParser from 'cookie-parser'
+import userRouter from './routes/userRoute.js'
 
 dotenv.config()
 
@@ -26,6 +27,8 @@ await initializedata()
 
 
 // api endpoints
+
+app.use('/v1/user', userRouter)
 
 app.use('/v1/leads', leadRouter)
 
