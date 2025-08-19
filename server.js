@@ -7,11 +7,13 @@ import salesAgentRouter from './routes/salesAgentRoute.js'
 import commentRouter from './routes/commentRoute.js'
 import reportRouter from './routes/reportRouter.js'
 import authRouter from './routes/authRoute.js'
+import cookieParser from 'cookie-parser'
 
 dotenv.config()
 
 const app = express()
 app.use(express.json())
+app.use(cookieParser())
 
 const corsOptions = {
     origin: "*",
