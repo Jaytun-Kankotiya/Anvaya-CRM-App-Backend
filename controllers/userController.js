@@ -6,6 +6,7 @@ export const getUserData = async (req, res) => {
         if(!userId) {
             return res.json({success: false, message: 'Not authorized'})
         }
+        
         const user = await userModel.findById(userId)
         if(!user) {
             return res.json({success: false, message: "User not found"})
