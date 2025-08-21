@@ -59,13 +59,12 @@ export const login = async (req, res) => {
   try {
     const user = await userModel.findOne({ email });
     if (!user) {
-      return res.status(400).json({ success: false, message: "Invalid Email" });
+      return res.json({ success: false, message: "Invalid Email" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res
-        .status(400)
         .json({ success: false, message: "Invalid Password" });
     }
 
@@ -134,9 +133,9 @@ export const sendVerificationOtp = async (req, res) => {
     };
     await transporter.sendMail(mailOption);
 
-    res.json({ success: true, message: "Verification OTP sent on Email" });
+    return res.json({ success: true, message: "Verification OTP sent on Email" });
   } catch (error) {
-    res.json({ success: false, message: error.message });
+    return res.json({ success: false, message: error.message });
   }
 };
 
@@ -245,7 +244,7 @@ export const verifyResetOtp = async (req, res) => {
         if(!user) {
             return res.json({success: false, message: 'User not found'})
         }
-        if(user.resetOtp === "" || user.resetOtp !== otp.toString()){
+        if(!user.resetOtp || String(user.resetOtp) !== String(otp)){
             return res.json({success: false, message: 'Invalid OTP'})
         }
 
@@ -280,7 +279,7 @@ export const resetPassword = async (req, res) => {
         user.password = hashedPassword
 
         await user.save()
-        res.json({success: true, message: 'Password has been reset successfully. Please Login to your account'})
+        return res.json({success: true, message: 'Password has been reset successfully. Please Login to your account'})
 
     } catch (error) {
         res.json({success: false, message: error.message})
