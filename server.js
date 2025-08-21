@@ -16,8 +16,10 @@ const app = express()
 app.use(express.json())
 app.use(cookieParser())
 
+const allowedOrigins = ['http://localhost:5173']
+
 const corsOptions = {
-    origin: "*",
+    origin: allowedOrigins,
     credentials: true,
     optionSuccessStatus: 200
 }

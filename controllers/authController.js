@@ -2,7 +2,6 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import userModel from "../models/userModel.js";
 import transporter from "../config/nodemailer.js";
-// import { errorMonitor } from "nodemailer/lib/xoauth2/index.js";
 
 export const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -36,7 +35,8 @@ export const register = async (req, res) => {
     const mailOption = {
       from: process.env.SENDER_EMAIL,
       to: email,
-      subject: `Welcome to Anvaya CRM App. Your account has been created with email: ${email}`,
+      subject: `Welcome to Anvaya CRM App.`,
+      text: `Welcome to Anvaya CRM App. Your account has been created with email: ${email}`
     };
     await transporter.sendMail(mailOption);
 
@@ -118,7 +118,7 @@ export const sendVerificationOtp = async (req, res) => {
       to: user.email,
       subject: `Your Account Verification OTP`,
       html: `
-    <div style="font-family: 'Helvetica', 'Arial', sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+    <div style="font-family: 'Helvetica', 'Arial', sans-serif">
       <h2 style="color: #101010ff;">Hello ${user.name || ""},</h2>
       <p>Thank you for signing up on <strong>Anvaya CRM</strong>.</p>
       <p>Your <strong>One-Time Password (OTP)</strong> to verify your account is:</p>
@@ -141,8 +141,8 @@ export const sendVerificationOtp = async (req, res) => {
 };
 
 export const verifyEmail = async (req, res) => {
-  const { otp, userId } = req.body;
-//   const userId = req.userId;
+  const { otp} = req.body;
+  const userId = req.userId;
 
   if (!userId || !otp) {
     return res.json({ success: false, message: "Missing Details" });
@@ -228,19 +228,45 @@ export const sendResetOtp = async (req, res) => {
     };
     await transporter.sendMail(mailOption);
 
-    return res.json({success: true, message: 'OTP sent to your email'})
+    return res.json({success: true, message: 'Password Reset OTP has been sent to your email'})
 
     } catch (error) {
         res.json({success: false, message: error.message})
     }
 }
 
+export const verifyResetOtp = async (req, res) => {
+    const {otp, email} = req.body
+        if(!otp || !email) {
+            return res.json({success: false, message: "Email and OTP are required"})
+        }
+    try {
+        const user = await userModel.findOne({email})
+        if(!user) {
+            return res.json({success: false, message: 'User not found'})
+        }
+        if(user.resetOtp === "" || user.resetOtp !== otp.toString()){
+            return res.json({success: false, message: 'Invalid OTP'})
+        }
+
+        if(user.resetOtpExpireAt < Date.now()) {
+            return res.json({success: false, message: 'OTP Expired'})
+        }
+        user.resetOtp = ''
+        user.resetOtpExpireAt = 0
+        await user.save()
+        return res.json({success: true, message: "OTP Verified Successfully"})
+    } catch (error) {
+        return res.json({success: false, message: error.message})
+    }
+}
+
 // Reset User Password
 
 export const resetPassword = async (req, res) => {
-    const {email, otp, newPassword} = req.body
+    const {email, newPassword} = req.body
 
-    if(!email || !otp || !newPassword){
+    if(!email || !newPassword){
         return res.json({success: false, message: 'Email, OTP, and new password are required'})
     }
 
@@ -250,22 +276,11 @@ export const resetPassword = async (req, res) => {
             return res.json({success: false, message: 'User not found'})
         }
 
-        if(user.resetOtp === "" || user.resetOtp !== otp){
-            return res.json({success: false, message: 'Invalid OTP'})
-        }
-
-        if(user.resetOtpExpireAt < Date.now()) {
-            return res.json({success: false, message: 'OTP Expired'})
-        }
-
         const hashedPassword = await bcrypt.hash(newPassword, 10)
-
         user.password = hashedPassword
-        user.resetOtp = ''
-        user.resetOtpExpireAt = 0
 
         await user.save()
-        res.json({success: true, message: 'Password has been reset successfully'})
+        res.json({success: true, message: 'Password has been reset successfully. Please Login to your account'})
 
     } catch (error) {
         res.json({success: false, message: error.message})
