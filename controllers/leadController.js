@@ -157,7 +157,6 @@ const getAllLeads = async (req, res) => {
         createdAt: lead.createdAt
     }))
 
-    // const leadList = await leadModel.find().populate("salesAgent", "name _id");
     if(response.length === 0){
         return res.status(404).json({message: "No leads found matching the criteria."})
     }
