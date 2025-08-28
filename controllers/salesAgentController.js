@@ -47,7 +47,7 @@ const getAllSalesAgent = async (req, res) => {
         if(!salesAgentsList) {
             return res.status(400).json({error: "Error fetching Sales Agents List."})
         }
-        res.status(200).json({message: "Sales Agents List", salesAgentsList})
+        res.status(200).json({success: true, message: "Sales Agents List", salesAgentsList})
     } catch (error) {
         res.status(500).json({error: "Sales Agents List not found."})
     }

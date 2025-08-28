@@ -18,7 +18,6 @@ const validPriorities = ["High", "Medium", "Low"];
 const validStatuses = ["New", "Contacted", "Qualified", "Proposal Sent", "Closed"]
 
 const addLead = async (req, res) => {
-  //   let image_filename = req.file ? req.file.filename : null
 
   try {
     const { name, source, salesAgent, status, tags, timeToClose, priority } =
