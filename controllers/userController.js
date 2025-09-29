@@ -4,14 +4,14 @@ export const getUserData = async (req, res) => {
     try {
         const userId = req.userId 
         if(!userId) {
-            return res.json({success: false, message: 'Not authorized'})
+            return res.status(404).json({success: false, message: 'Not authorized'})
         }
         
         const user = await userModel.findById(userId)
         if(!user) {
-            return res.json({success: false, message: "User not found"})
+            return res.status(404).json({success: false, message: "User not found"})
         }
-        return res.json({
+        return res.status(200).json({
             success: true,
             userData: {
                 name: user.name,
@@ -20,6 +20,6 @@ export const getUserData = async (req, res) => {
             }
         })
     } catch (error) {
-        res.json({success: false, message: error.message})
+        res.status(500).json({success: false, message: error.message})
     }
 } 
