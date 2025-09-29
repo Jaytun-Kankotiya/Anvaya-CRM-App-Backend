@@ -7,7 +7,7 @@ export const register = async (req, res) => {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
-    return res.json({ success: false, message: "Missing Detailes" });
+    return res.status(404).json({ success: false, message: "Missing Detailes" });
   }
 
   try {
@@ -40,7 +40,7 @@ export const register = async (req, res) => {
     };
     await transporter.sendMail(mailOption);
 
-    return res.json({ success: true });
+    return res.status(200).json({ success: true, data: user });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -64,7 +64,7 @@ export const login = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res
+      return res.status(400)
         .json({ success: false, message: "Invalid Password" });
     }
 
@@ -78,7 +78,7 @@ export const login = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    return res.json({ success: true, message: user });
+    return res.status(200).json({ success: true, message: user });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
