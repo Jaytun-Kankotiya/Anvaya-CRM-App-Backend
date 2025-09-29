@@ -6,6 +6,7 @@ import salesAgentModel from "../models/salesAgentModel.js";
 import { type } from "os";
 
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+
 const validSource = [
   "Website",
   "Referral",
@@ -23,10 +24,10 @@ const addLead = async (req, res) => {
     const { name, source, salesAgent, status, tags, timeToClose, priority } =
       req.body;
 
-    const leadExists = await leadModel.findOne({salesAgent})
-    if(leadExists){
-        return res.status(400).json({error: `Sales Agent with ID '${salesAgent}' is already assigned to another lead.`})
-    }
+    // const leadExists = await leadModel.findOne({salesAgent})
+    // if(leadExists){
+    //     return res.status(400).json({error: `Sales Agent with ID '${salesAgent}' is already assigned to another lead.`})
+    // }
 
     if (!name || typeof name !== "string") {
       return res.status(400).json({
@@ -198,7 +199,7 @@ const updateLead = async (req, res) => {
     }
 
     if (
-      timeToClose === undefined ||
+      !timeToClose  ||
       typeof timeToClose !== "number" ||
       timeToClose <= 0
     ) {
@@ -216,11 +217,18 @@ const updateLead = async (req, res) => {
         });
     }
 
-    const updateLeadData = await leadModel.findByIdAndUpdate(req.params.id, {$set: req.body}, {new: true}).populate("salesAgent", "name _id")
+    const updateData = {...req.body}
+
+    if(status === "Closed") {
+      updateData.closedAt = new Date()
+    }else {
+      updateData.closedAt = null
+    }
+
+    const updateLeadData = await leadModel.findByIdAndUpdate(req.params.id, {$set: updateData}, {new: true}).populate("salesAgent", "name _id")
     if(!updateLeadData) {
         return res.status(404).json({error: `Lead with ID '${req.params.id}' not found.`})
     }
-    // updateLead.populate("salesAgent", "name _id")
     res.status(200).json({message: "Lead Data Updated Successfully:", 
       id: salesAgent,
       name: updateLeadData.name,
@@ -234,11 +242,14 @@ const updateLead = async (req, res) => {
       timeToClose: updateLeadData.timeToClose,
       priority: updateLeadData.priority,
       updatedAt: updateLeadData.updatedAt,
+      closedAt: updateLeadData.closedAt
     })
   } catch (error) {
-    res.status(500).json({error: "Failed to update lead data."})
+    console.log("Update Lead Error", error)
+    res.status(500).json({error: "Failed to update lead data.", details: error.message})
   }
 };
+
 
 const deleteLead = async (req, res) => {
     try {
