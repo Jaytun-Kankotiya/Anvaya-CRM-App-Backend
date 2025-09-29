@@ -21,7 +21,7 @@ const allowedOrigins = ['http://localhost:5173']
 const corsOptions = {
     origin: allowedOrigins,
     credentials: true,
-    optionSuccessStatus: 200
+    optionsSuccessStatus: 200
 }
 app.use(cors(corsOptions))
 
