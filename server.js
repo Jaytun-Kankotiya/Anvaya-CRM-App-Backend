@@ -18,13 +18,6 @@ app.use(cookieParser())
 
 const allowedOrigins = ['http://localhost:5173', 'https://anvaya-crm-app-frontend.vercel.app']
 
-// const corsOptions = {
-//     origin: allowedOrigins,
-//     credentials: true,
-//     optionsSuccessStatus: 200
-// }
-// app.use(cors(corsOptions))
-
 app.use(cors({
   origin: function(origin, callback) {
     if (!origin) return callback(null, true);

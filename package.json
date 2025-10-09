@@ -32,5 +32,8 @@
     "url": "https://github.com/Jaytun-Kankotiya/Anvaya-CRM-App-Backend/issues"
   },
   "homepage": "https://github.com/Jaytun-Kankotiya/Anvaya-CRM-App-Backend#readme",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
 }
