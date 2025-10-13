@@ -122,7 +122,6 @@ Sample Response:</br>
   },
   ...
 ]
-
 ```
 
 ### **Post /agents**</br>
